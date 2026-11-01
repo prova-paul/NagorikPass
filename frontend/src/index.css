@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* NagorikPass design tokens. Components use these names, so a change here reaches every page. */
+@theme {
+  --color-*: initial;
+
+  --color-white: #ffffff;
+
+  --color-primary-50: #f6f3fe;
+  --color-primary-100: #ece7fc;
+  --color-primary-200: #dbd2f8;
+  --color-primary-300: #bfb0f0;
+  --color-primary-500: #6c4ed0;
+  --color-primary-600: #5d41bb;
+  --color-primary-700: #4d359e;
+
+  --color-navy-950: #11112f;
+  --color-navy-900: #1c1c45;
+  --color-navy-800: #2c2c5c;
+  --color-navy-300: #bcbcd8;
+
+  --color-canvas: #f3f2f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #faf9fd;
+  --color-line: #e8e6f2;
+  --color-line-strong: #d4d1e3;
+
+  --color-ink: #1e1c3a;
+  --color-muted: #5e5d7a;
+  --color-subtle: #8e8da8;
+
+  --color-success-50: #e7f7ee;
+  --color-success-600: #17723f;
+  --color-warning-50: #fdf3df;
+  --color-warning-200: #f3d9a4;
+  --color-warning-600: #975405;
+  --color-danger-50: #fdecec;
+  --color-danger-600: #bf2626;
+  --color-info-50: #e7f0fd;
+  --color-info-600: #1c5cb0;
+  --color-neutral-100: #efeef5;
+  --color-neutral-600: #55546e;
+
+  /* Checked with the data-viz palette validator for colour-blind separation. */
+  --color-chart-arrivals: #6c4ed0;
+  --color-chart-departures: #0f9d8a;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Secondary lines such as a visitor's company, and table column headings. */
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.25rem;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1rem;
+
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
+  --shadow-card: 0 1px 2px rgb(30 28 58 / 0.04), 0 2px 8px rgb(30 28 58 / 0.03);
+  --shadow-overlay: 0 16px 40px rgb(30 28 58 / 0.16);
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+}
