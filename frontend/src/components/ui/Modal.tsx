@@ -1,3 +1,5 @@
+'use client'
+
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Button, IconButton } from './Button'

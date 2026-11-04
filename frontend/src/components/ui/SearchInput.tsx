@@ -1,3 +1,5 @@
+'use client'
+
 import { useId } from 'react'
 import { Search } from 'lucide-react'
 import { compactLabelClass } from './Input'

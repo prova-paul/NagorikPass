@@ -1,302 +1,219 @@
 # NagorikPass — Project Guide
 
+> **Updated 2026-11-04** for the updated PRD (`docs/NagorikPass_PRD.pdf`). What changed from v1, and why, is in `docs/REQUIREMENT_CHANGELOG.md`. The v1 text is in git: `git show HEAD:Project_Guide.md`.
+>
+> This guide summarizes. If it conflicts with the PRD, the PRD wins: report the conflict, do not choose silently. Items marked **[Pending Dn]** wait for a decision listed in `docs/DECISIONS_AND_OPEN_QUESTIONS.md`.
+>
+> **Status of the code:** the application still follows v1 (HR/Admin approval gates, no visitor cards). Sections 7–12 describe the *required* behavior. `docs/REQUIREMENT_CHANGELOG.md` section 4 lists what is built and what is not.
+
 ## 1. Project Overview
 
 **Project name:** NagorikPass  
 **Tagline:** Smart Visitor Management. Seamless Workplace Access.
 
-NagorikPass is a browser-based Visitor Management System that helps HR/Admin, Receptionists, and Employees manage visitor requests, approvals, check-ins, check-outs, and visit history.
+NagorikPass is a browser-based Visitor Management System. It replaces manual visitor logs with one place for visitor registration, expected visitors, check-in and check-out, visitor cards, notifications, dashboards, history and reports, with role-based access that protects employee information. HR/Admin, Receptionists and Employees each have their own area.
 
 ## 2. Design Reference
 
-The primary UI reference is VisitX.
+The primary visual reference is `design_resources/NagorikPass Visitor Management Showcase-1.png`. Inspect it before changing UI. Use it for color, layout, spacing and feel only. Never copy its sample names, dates, numbers or notifications as real data.
 
-Use screenshots in `design_references/visitx/`.
+Direction: **royal purple, lavender and white.** Deep purple sidebar, white cards and tables on a very light lavender background, rounded controls, clear status colors, clean dashboard charts.
 
-Follow this visual direction:
-- Dark navy sidebar
-- Purple primary accent
-- Light grey/lavender dashboard background
-- White cards and tables
-- Modern typography
-- Rounded cards and controls
-- Clean dashboard charts and calendar
-- Professional visitor-management layout
+Colors sampled from the image (approximate):
 
-Initial palette:
-- Primary purple: `#7560E8`
-- Sidebar navy: `#171A3B`
-- Main background: `#F5F6FA`
-- Card background: `#FFFFFF`
-- Main text: `#252641`
-- Secondary text: muted grey
-- Success: green
-- Warning: orange
-- Danger: red
+| Use | Value |
+|---|---|
+| Sidebar | `#2a1874` to `#301b79` |
+| Primary buttons | `#441ab3` to `#4f23b7` |
+| Active navigation item | `#8363d6` |
+| Page background | `#faf9fd` to `#f3f2fd` |
+| Cards | white |
 
-Do not use NagorikEats's warm cream color scheme.
+Success is green, warning orange, danger red. Never rely on color alone: use text or an icon. Design tokens live in `frontend/src/index.css`; the restyle from the v1 navy palette is planned in Phase 2.
+
+The image also shows things the PRD does **not** ask for: Google sign-in, a Print Card button, a card-punching machine illustration (the PRD says that integration is out of scope), and a notification bell. Do not build these without approval.
+
+The v1 reference to NagorikEats's warm cream palette still applies: do not use it.
 
 ## 3. User Roles and Permissions
 
-There are exactly three application login roles:
-
-1. **HR/Admin**
-2. **Receptionist**
-3. **Employee**
-
-Keep employee records separate from application login accounts. Employees can have login accounts to submit visitor requests and approve unexpected visitor requests addressed to them.
+There are exactly three login roles. Employee records stay separate from login accounts; employees may have an account.
 
 ### HR/Admin
-- Manage visitors, employees, receptionists, and settings.
-- Pre-register visitors.
-- Review and approve or reject visitor requests.
-- Give final approval for every visitor's entry. No visitor enters without HR/Admin approval.
-- View reports and visitor history.
-- Export and share reports according to permissions.
+- Manage employees, receptionists and visitor records.
+- Register expected visitors in advance.
+- Monitor the dashboard, visitor history and reports.
+- Receive a notification when a visitor checks in.
+- Monitor visitors that employees register (they appear without approval).
+- Register visitor cards, manually or by bulk Excel upload; monitor card status and assignment history.
+- Upload interview candidate lists by Excel; register VIP visits and groups.
 
 ### Receptionist
-- View expected visitors and visitor history.
-- Register unexpected visitors.
-- Submit entry approval requests to HR/Admin for every arriving expected visitor, whether pre-registered by HR/Admin or requested by an employee.
-- Verify visitor identity.
-- Check in only visitors eligible for entry.
-- Check out visitors.
-- View only the employee information needed for visitor coordination.
-
-Receptionists must never receive employee official email addresses or private employee contact information through the UI or API.
+- View expected visitors; register unscheduled visitors.
+- Search for the employee a visitor wants to meet.
+- Check visitors in and out; manage visitor information on web and mobile.
+- Assign an Available visitor card at check-in; confirm its return at check-out.
+- **Must not check in delivery personnel.**
+- Sees employee **name and team only**. Never receives an employee's official email, phone or other private information through the UI or API.
 
 ### Employee
-- Submit visitor requests for HR/Admin approval.
-- Review unexpected visitor requests addressed to them.
-- Approve or reject those requests.
-- View only their own requests and relevant visitor information.
+- Register their own visitors directly, **without HR/Admin approval**.
+- Provide visitor information before the visit and coordinate their invited visitors.
+- See only their own visitors.
+- Is notified when a visitor they registered checks in.
 
-Employees cannot perform Admin or Receptionist actions.
+Employees cannot perform HR/Admin or Receptionist actions.
 
 ## 4. HR/Admin Features
 
-- Dashboard
-- Visitor Management
-- Add New Visitor / Pre-register
-- Expected Visitors
-- Visitor History
-- Employee Management
-- Receptionist Management
-- Reports
-- Settings
-- Visitor request approvals
+Navigation: Dashboard, Visitor Management, Visitor Approval **[Pending D3]**, Visitor History, Visitor Cards, Employee Management, Receptionist Management, Reports, Settings.
 
-Admin dashboard statistics:
-- Total Visitors
-- Expected Visitors Today
-- Currently Checked-in
-- Pending Approvals
-- Completed Visits
-- Rejected Visits
+Dashboard: Total Visitors, Expected Today, Checked In, Pending Approval, Completed, Rejected, activity graphs, and a visitor timeline. The dashboard also shows each checked-in visitor's assigned card. All figures come from real visit data, never hardcoded values. (The Rejected tile is in the PDF but not in `docs/PRD.md`; see REQUIREMENT_CHANGELOG S1.)
 
-Dashboard analytics should use actual visit data, including the activity calendar, daily arrivals/departures, and visitor countdowns.
+Visitor Management: manage visitors; add expected visitors in a modal (name, phone and purpose required); register VIP visits with an expected number of guests; upload interview candidates by Excel.
+
+Visitor History: search past visits with check-in and check-out details, the card issued and returned, and the visitor type.
+
+Visitor Cards: register cards manually or by Excel; see status and assignment history.
+
+Employee Management: manage employees. Receptionist Management: manage receptionist accounts and access. Reports: arrival and departure data and a PDF report table. Settings: application configuration.
 
 ## 5. Receptionist Features
 
-- Dashboard
-- Expected Visitors
-- Add Unexpected Visitor
-- Pending Approvals / Entry Requests
-- Checked-in Visitors
-- Visitor History
+Navigation: Home, Expected Visitors, Add New Visitor (plus a Checked-in list, which check-out needs).
 
-Receptionist dashboard statistics:
-- Expected Visitors Today
-- Currently Checked-in
-- Pending Approvals
-- Completed Visits Today
+Home: Total Visitors Today, Currently Checked In, Checked Out, and today's visitor list.
+
+Expected Visitors: find and verify pre-registered visitors, check them in and record timestamps.
+
+Add New Visitor: required name, phone and purpose; additional number of guests and company; search for and associate the host employee. If the host is not found, contact HR/Admin and enter the confirmed employee in **Invited By**. No additional approval.
 
 ## 6. Employee Features
 
-- Employee Dashboard
-- Submit Visitor Request
-- My Visitor Requests
-- Unexpected Visitor Approvals
+- Dashboard.
+- **Add New Visitor:** enter the visitor's information and visit details; the visitor goes straight to Expected Visitors and the HR/Admin records.
+- **My Visitors:** upcoming and past visitors, with status.
 
-Employees can:
-- Submit visitor details, purpose, host information where applicable, and scheduled visit times.
-- View the status of their own requests.
-- Approve or reject unexpected visitor requests addressed to them.
+## 7. Standard Check-In and Check-Out (every workflow)
 
-Employees cannot approve their own requests.
+### Check-in
+1. The Receptionist registers the visitor or finds them in the system.
+2. The Receptionist verifies the visitor's identity.
+3. The Receptionist selects an **Available** card from the visitor list and clicks Check-in.
+4. The system links the card to the visit, records the check-in time and changes the card from Available to **Issued**.
+5. The assigned card and visitor details appear on the HR/Admin dashboard, and HR/Admin is notified.
 
-## 7. Workflow A — HR/Admin Pre-registers a Visitor
+### Check-out
+1. The visitor returns the card to the Receptionist, who clicks Check-out.
+2. The system asks: **"Did you get the visitor card back?"**
+3. **Yes:** record the check-out time, set the visit to Checked Out, change the card from Issued to Available, update the HR/Admin dashboard.
+4. **No:** check-out stays incomplete. The visitor remains Checked In, the card remains Issued and linked, and the card must be recovered first.
+5. Every assignment and return is kept in the card history with issue and return date and time.
 
-1. HR/Admin creates a visitor record with visitor details, purpose, scheduled arrival/departure, and one or more hosts.
-2. The system saves the visitor as an expected visit.
-3. The visitor appears in the Receptionist's Expected Visitors list.
-4. When the visitor arrives, the Receptionist finds and verifies the visitor.
-5. The Receptionist submits an entry approval request to HR/Admin.
-6. HR/Admin approves or rejects the entry request.
-7. Only after approval can the Receptionist check in the visitor.
-8. The system records the actual check-in timestamp separately from the scheduled arrival.
-9. The system notifies the selected hosts that the visitor has arrived.
-10. The Receptionist checks out the visitor when the visit ends.
-11. The system records the actual check-out timestamp separately from the scheduled departure.
+## 8. Visitor Workflows
 
-## 8. Workflow B — Employee Submits a Visitor Request
+All workflows end with the standard check-in and check-out above.
 
-1. Employee logs in and submits a visitor request with visitor details, purpose, scheduled arrival/departure, and any required host information.
-2. The request goes directly to HR/Admin.
-3. HR/Admin approves or rejects the request.
-4. If approved, the visit becomes an expected visit and appears in the Receptionist's Expected Visitors list. This approval allows the visit to take place; it does not approve entry.
-5. When the visitor arrives, the Receptionist verifies the visitor's identity and submits an entry approval request to HR/Admin.
-6. HR/Admin approves or rejects the entry request.
-7. Only after entry approval can the Receptionist check in the visitor.
-8. The system records actual check-in and check-out timestamps separately from scheduled times.
+- **A — HR/Admin pre-registers:** HR/Admin registers the visitor; they appear in Expected Visitors; the Receptionist verifies and checks them in; HR/Admin is notified.
+- **B — Employee-initiated:** the employee adds the visitor; they appear in Expected Visitors and the HR/Admin dashboard and records; no approval; on check-in **both the employee and HR/Admin** are notified.
+- **C — Unscheduled:** the Receptionist registers the visitor and searches for the employee; if not found, contacts HR/Admin and records the confirmed employee in Invited By; checks the visitor in; HR/Admin is notified. No further employee approval.
+- **D — Personal guest:** the Receptionist registers the guest, records whom they meet (Invited By), checks them in and issues a card. Saved with type Personal Guest.
+- **E — Interview candidate:** HR uploads an Excel sheet; candidates appear in Expected Visitors; the Receptionist checks them in and issues a card. **[Pending D6]** for the Excel format.
+- **F — VIP and groups:** HR/Admin registers the VIP visit with the expected number of guests; the Receptionist verifies the actual number; the system records name, guest count, invited-by employee and organization; cards are issued per the standard procedure. **[Pending D5]**
+- **Delivery personnel:** not permitted to enter. Never checked in, never given a card.
 
-## 9. Workflow C — Unexpected Visitor Arrives at Reception
+## 9. Business Rules
 
-1. Receptionist registers the unexpected visitor and selects the employee they want to meet.
-2. The system creates a request with status `pending_host_approval`.
-3. The selected host employee receives a notification.
-4. The employee approves or rejects the request.
-5. If rejected, the request ends as rejected and cannot proceed to check-in.
-6. If approved, the request automatically moves to HR/Admin with status `pending_admin_approval`.
-7. HR/Admin gives final approval or rejection.
-8. If Admin rejects, the visitor cannot check in.
-9. If Admin approves, the visitor becomes eligible for check-in.
-10. Receptionist verifies the visitor's identity and checks them in.
-11. The system records actual check-in and notifies the relevant host.
+- Mandatory: visitor **name, phone, purpose**. A visitor **category** must be recorded. Additional: number of guests, invited by, company.
+- Employee-registered visitors need **no** HR/Admin approval. Unscheduled visitors need **no** further employee approval once registered with a host or Invited By.
+- Delivery/Courier visitors cannot be checked in or issued a card. Enforce this in the database or server logic, not only in the UI.
+- Every card has a unique Card Number. Only an Available card can be assigned. An Issued card cannot go to another active visitor.
+- Check-out completes only after the Receptionist confirms the card was returned.
+- Preserve card issue and return history with timestamps.
+- Enforce authorization on the server or in database policies, not only by hiding controls.
+- Record check-ins, check-outs, card events and sensitive account changes in the audit log. Never log passwords or tokens.
 
-## 10. Approval and Check-in Rules
+**Superseded from v1:** no check-in approval step, no host approval, no HR final approval, no entry approval, no approval of employee requests. Existing code for these remains until **D3** says what happens to the Visitor Approval module and Pending Approval and Rejected counts.
 
-- No visitor may enter without HR/Admin approval of that entry. Every workflow ends with HR/Admin approval before check-in.
-- A visitor cannot check in while any required approval is pending.
-- A rejected request cannot check in.
-- Employee approval is required before Admin approval for unexpected visitors.
-- Admin approval is final for unexpected visitor entry.
-- Admin pre-registered visitors require Receptionist-submitted entry approval and Admin approval at arrival, every time.
-- Employee-submitted requests require Admin approval before appearing as expected visitors, and Receptionist-submitted entry approval and Admin approval again at arrival.
-- Only authorized Receptionists can perform check-in and check-out.
-- Enforce these rules in backend APIs, not only in the frontend.
-- Record each approval decision, actor, timestamp, and reason where provided.
+## 10. Statuses
 
-## 11. Visitor and Approval Statuses
+Keep **visit status** and **card status** separate.
 
-Use clear statuses appropriate to each workflow.
+- **Card:** `available`, `issued`.
+- **Visit, required by the PRD:** expected, checked in, checked out. The dashboard also counts Pending Approval and Rejected, so the full vocabulary and transitions are unresolved **[Pending D3, D9]**.
+- **Visit, in the current code** (v1): `pending_employee_request`, `pending_host_approval`, `pending_admin_approval`, `expected`, `awaiting_entry_approval`, `approved`, `rejected`, `checked_in`, `checked_out`, `cancelled`. The first three approval statuses and `awaiting_entry_approval` belong to the superseded flow.
+- Approval records, where they remain, use `pending`, `approved`, `rejected`, `expired`.
 
-### Visit statuses
-- `pending_employee_request`
-- `pending_host_approval`
-- `pending_admin_approval`
-- `expected`
-- `awaiting_entry_approval`
-- `approved`
-- `rejected`
-- `checked_in`
-- `checked_out`
-- `cancelled`
+## 11. Invited By
 
-### Approval statuses
-- `pending`
-- `approved`
-- `rejected`
-- `expired`
+Replaces v1's "Meeting With". A visit names the employee being visited:
 
-Keep approval records and visit status transitions auditable. Do not use one generic `pending_approval` status when the system needs to distinguish host approval, Admin approval, and entry approval.
+- Search by permitted fields and select one employee; or
+- If not found, the Receptionist contacts HR/Admin and types the confirmed employee's name.
 
-## 12. Meeting With Feature
+The Receptionist-facing search and every receptionist response return **name and team only** (v1 also returned employee ID and designation). Store the relation in the database; whether more than one host is allowed is **[Pending D4]**. "Team" is assumed to be the existing `department` **[Pending D7]**.
 
-Support selecting one or multiple employees where the workflow permits.
+## 12. Visitor Cards
 
-Display to Receptionists:
-- Employee ID
-- Employee name
-- Department
-- Designation
-
-Never expose employee official email or private contact information in receptionist-facing UI or API responses.
-
-Store selected hosts in a separate `visit_hosts` relationship.
+- HR/Admin registers cards one at a time or by Excel (for example, 50 numbers). Registered cards appear for the Receptionist.
+- Each card has exactly one current status, Available or Issued.
+- History per assignment: card number, visitor, issued at, returned at, assigned or returned status, who issued and who received it.
+- HR/Admin monitors: visitor name, visitor ID, card number, check-in time, card status, check-out status, history.
+- Integration with a physical card-punching machine is **not** required.
 
 ## 13. Time and Visit Analytics
 
-Store scheduled and actual timestamps separately:
-- `scheduled_arrival_at`
-- `scheduled_departure_at`
-- `actual_check_in_at`
-- `actual_check_out_at`
+Store scheduled and actual timestamps separately: the scheduled arrival and departure, and the actual check-in and check-out. Arrival delay is actual check-in minus scheduled arrival. Departure delay is actual check-out minus scheduled departure. Show countdowns for upcoming arrivals and departures and update them dynamically. Handle pending, cancelled, completed and overdue visits correctly. Whether scheduled times are mandatory is **[Pending D6]**. Dashboard calendar and charts come from visit records, never hardcoded values.
 
-Calculate arrival delay as actual check-in minus scheduled arrival.
+## 14. Notifications
 
-Calculate departure delay as actual check-out minus scheduled departure.
+- When a visitor checks in, notify HR/Admin automatically with visitor name, phone, invited employee and check-in details. For an employee-registered visitor, also notify that employee.
+- WhatsApp or Telegram if integration is available **[Pending D8]**. Until then, email through the existing transport, and the Receptionist may call HR/Admin if delivery fails.
+- A failed notification must never block check-in. Record it and show the result.
+- Keep provider secrets on the server, never in the browser.
 
-Show countdowns for upcoming arrivals and scheduled departures. Update countdowns dynamically and handle pending, cancelled, completed, and overdue visits correctly.
+## 15. Report Export and Sharing
 
-Dashboard calendar and charts must be derived from visit records, not hardcoded UI values.
+Reports provide arrival and departure data and a PDF report table. The code also exports DOCX and CSV; these are kept but are not PRD requirements. Exports respect the selected date range and filters.
 
-## 14. Report Export and Sharing
+Do not create public report links by default. A persistent sharing link must use a secure, expiring, revocable token and enforce authorization. Receptionist reports must not contain employee emails or private information.
 
-Admin reports may support:
-- PDF export
-- Editable DOCX export
-- CSV export
-- Native device/browser sharing
-- Copying a report link
+## 16. Technology
 
-Exports must respect selected date ranges and filters.
+Frontend: React, TypeScript and **Next.js** (App Router), Tailwind CSS. The PRD (§8) names Vite; the product owner chose Next.js on 2026-11-04 (decision DEC-011). Receptionist on web and mobile (responsive web today **[Pending D8]**).
 
-Do not create public report links by default. Persistent sharing links must use secure, expiring, revocable tokens and enforce authorization.
+Backend, database and authentication:
 
-Receptionist reports must not contain employee emails or private employee information.
+| | PRD (P§8) | Code today |
+|---|---|---|
+| Platform | Supabase | Node.js, Express, TypeScript |
+| Database | Supabase PostgreSQL | PostgreSQL |
+| Authentication | Supabase Auth | Custom sessions, password hashing, login rate limit |
+| Authorization | Role-based access and database policies (RLS) | Role guards in Express |
 
-## 15. Suggested Technology Stack
+**Do not add or replace a backend, database or authentication provider without approval. [Pending D1]**
 
-Frontend:
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- React Router
+Email: SMTP or transactional service (existing). Excel import: needs a spreadsheet-reading dependency, which needs approval. Never hardcode real credentials or secrets.
 
-Backend:
-- Node.js
-- Express.js
+## 17. Development Rules
 
-Database:
-- PostgreSQL
-
-Email:
-- SMTP or transactional email service
-
-Authentication:
-- Secure session-based or token-based authentication
-- Role-based authorization
-
-Never hardcode real credentials or secrets.
-
-## 16. Development Rules
-
-- Inspect the existing architecture before editing.
-- Build one feature at a time.
-- Reuse common components and design tokens.
-- Keep frontend, backend, and database logic organized.
-- Use responsive layouts.
-- Use realistic mock data during frontend development.
-- Do not claim mock data is connected to a real backend.
-- Validate all form inputs.
-- Protect all routes and API endpoints by role.
-- Enforce approval order and check-in restrictions on the backend.
-- Record visitor activity and approval decisions in an audit log.
-- Never expose employee private information to Receptionists.
+- Read `CLAUDE.md` and the relevant `docs/` file before changing anything.
+- Inspect the existing architecture and code before editing. Preserve working behavior unless the PRD requires a change.
+- Build one feature at a time; wait at the approval gates in `docs/IMPLEMENTATION_PLAN.md`.
+- Reuse shared components and design tokens. Keep frontend, backend and database logic organized.
+- Use responsive layouts. Handle loading, empty, error and success states.
+- Validate all form input on the client, and enforce important rules on the server or database.
+- Protect every route and endpoint by role. Never expose private employee information to Receptionists.
+- Use realistic mock data only in development, and never claim it is connected to a backend.
+- Never edit an applied migration; add a new numbered one. Back up before migrating data you care about.
+- Never run the backend tests against the development database; they empty every table.
 - Ask before deleting or overwriting existing files.
-- Preserve existing functionality unless a change is explicitly required.
+- Report test results as they are. Do not claim something works unless it was tested.
 
-## 17. Development Order
+## 18. Development Order
 
-1. Inspect screenshots and prepare the design system.
-2. Build login and shared dashboard layouts.
-3. Build HR/Admin pages.
-4. Build Receptionist pages.
-5. Build Employee pages and request workflows.
-6. Add realistic mock data and frontend interactions.
-7. Build backend APIs, database, and authentication.
-8. Implement role-based authorization and approval state transitions.
-9. Implement email notifications and secure approval links.
-10. Test permissions, workflows, exports, and responsive layouts.
+See `docs/IMPLEMENTATION_PLAN.md`. In short: approve decisions D1–D9, design the data changes, restyle and re-navigate, build cards with the new check-in and check-out, build direct employee registration and the unscheduled flow, add Excel imports and VIP groups, add notifications and reports, then retire the superseded approval code, update the tests and check security and responsive layouts.
+
+## 19. Implementation Status
+
+Not repeated here. `docs/REQUIREMENT_CHANGELOG.md` section 4 audits every feature as keep, modify, partial, missing or obsolete.

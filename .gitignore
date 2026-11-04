@@ -1,0 +1,18 @@
+# Dependencies and build output
+node_modules
+dist
+
+# Secrets. Only the *.example files are committed.
+.env
+.env.*
+!.env.example
+
+# Supabase CLI state (linked project ref, temp files) and local function secrets
+supabase/.temp
+supabase/.branches
+supabase/functions/.env
+
+.DS_Store
+
+# Browser-tool scratch files
+.playwright-mcp

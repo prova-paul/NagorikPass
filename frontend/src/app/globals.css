@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* NagorikPass design tokens. Components use these names, so a change here reaches every page.
+   Royal purple, lavender and white, sampled from design_resources/NagorikPass Visitor Management Showcase-1.png. */
+@theme {
+  --color-*: initial;
+
+  --color-white: #ffffff;
+
+  --color-primary-50: #f3f2fd;
+  --color-primary-100: #dfddf7;
+  --color-primary-200: #cbc6ee;
+  --color-primary-300: #a99dd6;
+  --color-primary-500: #2c1971;
+  --color-primary-600: #45239b;
+  --color-primary-700: #231259;
+  --color-secondary: #7a67af;
+
+  --color-navy-950: #2c1971;
+  --color-nav-active: #6b4fc7;
+  --color-navy-900: #3a2487;
+  --color-navy-800: #4a35a0;
+  --color-navy-300: #dfddf7;
+
+  --color-canvas: #f3f2fd;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8f7fe;
+  --color-line: #e6e3f7;
+  --color-line-strong: #cfcbea;
+
+  --color-ink: #171329;
+  --color-muted: #5e5d7a;
+  --color-subtle: #77738c;
+
+  --color-success-50: #e7f7ee;
+  --color-success-600: #17723f;
+  --color-warning-50: #fdf3df;
+  --color-warning-200: #f3d9a4;
+  --color-warning-600: #975405;
+  --color-danger-50: #fdecec;
+  --color-danger-600: #bf2626;
+  --color-info-50: #e7f0fd;
+  --color-info-600: #1c5cb0;
+  --color-neutral-100: #efeef5;
+  --color-neutral-600: #55546e;
+
+  /* Checked with the data-viz palette validator for colour-blind separation. */
+  --color-chart-arrivals: #45239b;
+  --color-chart-departures: #0f9d8a;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Secondary lines such as a visitor's company, and table column headings. */
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.25rem;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1rem;
+
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
+  --shadow-card: 0 1px 2px rgb(44 25 113 / 0.05), 0 2px 8px rgb(44 25 113 / 0.05);
+  --shadow-overlay: 0 16px 40px rgb(44 25 113 / 0.18);
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+}

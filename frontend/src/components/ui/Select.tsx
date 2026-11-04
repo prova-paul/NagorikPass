@@ -1,3 +1,5 @@
+'use client'
+
 import { useId, type SelectHTMLAttributes } from 'react'
 import { compactLabelClass, controlClass, FieldMessage, labelClass } from './Input'
 

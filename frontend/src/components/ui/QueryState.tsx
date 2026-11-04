@@ -1,5 +1,5 @@
 import { AlertCircle, Loader2 } from 'lucide-react'
-import { errorMessage } from '../../api/client'
+import { errorMessage } from '../../lib/errors'
 import { Button } from './Button'
 import { Logo } from './Logo'
 

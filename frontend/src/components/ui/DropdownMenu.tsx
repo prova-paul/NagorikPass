@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from './Button'

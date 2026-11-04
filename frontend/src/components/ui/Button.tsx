@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
-import { Link, type LinkProps } from 'react-router'
+import Link from 'next/link'
+import type { ComponentProps } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
@@ -49,7 +50,7 @@ export function Button({
   )
 }
 
-export function ButtonLink({ variant, size, className, ...props }: StyleProps & LinkProps) {
+export function ButtonLink({ variant, size, className, ...props }: StyleProps & ComponentProps<typeof Link>) {
   return <Link className={buttonClass({ variant, size, className })} {...props} />
 }
 

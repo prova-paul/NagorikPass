@@ -1,5 +1,7 @@
 # NagorikPass
 
+> **Legacy notice (2026-11-04).** This describes the original Express and PostgreSQL application. The frontend is now Next.js with Supabase (see `frontend/README.md` and `docs/IMPLEMENTATION_TRACKER.md`). The Express backend stays in the repository until its replacement is complete and verified; these instructions no longer start a working app.
+
 Smart Visitor Management. Seamless Workplace Access.
 
 A browser-based visitor management system with three login roles. HR/Admins pre-register visitors, manage employees and login accounts, and give the final approval for every visitor's entry. Receptionists register walk-ins, ask HR/Admin to approve entry for every arriving expected visitor, and check visitors in and out. Employees submit visitor requests for HR/Admin to approve, and answer walk-ins who ask for them, in the app or through a secure email link that needs no account.

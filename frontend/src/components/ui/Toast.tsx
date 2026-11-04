@@ -1,6 +1,7 @@
+'use client'
+
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, CheckCircle2, X } from 'lucide-react'
-import { useAuth } from '../../auth/AuthContext'
 
 type ToastTone = 'success' | 'error'
 
@@ -18,14 +19,8 @@ const ToastContext = createContext<((message: string, tone?: ToastTone) => void)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
   const nextId = useRef(1)
-  const { user } = useAuth()
-
-  // Messages can name visitors, so they don't outlast the session.
-  const [lastUser, setLastUser] = useState(user)
-  if (user !== lastUser) {
-    setLastUser(user)
-    if (!user) setToasts([])
-  }
+  // Messages can name visitors, so they must not outlast the session. The provider is mounted inside the
+  // signed-in area only, so signing out unmounts it and the messages go with it.
 
   const dismiss = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id))

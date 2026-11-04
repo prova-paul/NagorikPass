@@ -1,5 +1,7 @@
 # NagorikPass Backend
 
+> **Legacy notice (2026-11-04).** This describes the original Express and PostgreSQL application. The frontend is now Next.js with Supabase (see `frontend/README.md` and `docs/IMPLEMENTATION_TRACKER.md`). The Express backend stays in the repository until its replacement is complete and verified; these instructions no longer start a working app.
+
 Node.js, Express, TypeScript and PostgreSQL. Requires Node.js 22.12 or newer and PostgreSQL 13 or newer.
 
 ## Set up

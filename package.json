@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "supabase": "^3.0.0"
+  },
+  "scripts": {
+    "test:db": "supabase/tests/run.sh",
+    "test:functions": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON supabase/functions/_shared/",
+    "typecheck:functions": "frontend/node_modules/.bin/tsc -p supabase/functions/tsconfig.json && frontend/node_modules/.bin/tsc -p supabase/functions/tsconfig.test.json",
+    "test:import-parity": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON supabase/tests/import_parity.mjs",
+    "types:generate": "supabase gen types --remote --schema public > frontend/src/types/database.ts"
+  }
+}

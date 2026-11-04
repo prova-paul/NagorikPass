@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Link } from 'react-router'
+import Link from 'next/link'
 import { toneClasses, type Tone } from './tones'
 
 export interface Stat {
@@ -40,7 +40,7 @@ export function StatCard({ label, value, icon: Icon, tone, context, to, attentio
   if (!to) return <div className={`${cardClass} ${borderClass}`}>{content}</div>
 
   return (
-    <Link to={to} className={`${cardClass} ${borderClass} transition-colors hover:border-primary-300`}>
+    <Link href={to} className={`${cardClass} ${borderClass} transition-colors hover:border-primary-300`}>
       {content}
     </Link>
   )

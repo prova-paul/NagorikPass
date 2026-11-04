@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "../../frontend/node_modules/@types"
+    ]
+  },
+  "include": [
+    "_shared/*.ts"
+  ],
+  "exclude": []
+}
