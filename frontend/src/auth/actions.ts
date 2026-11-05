@@ -44,6 +44,8 @@ export async function signInAction(_previous: LoginState, formData: FormData): P
         email,
       }
     }
+    // An account is Active from its first sign-in. A failure here must not stop the person signing in.
+    await supabase.rpc('mark_account_active')
     destination = safeNextPath(next, state.user.role)
   } catch (error) {
     if (error instanceof SupabaseConfigError) return { error: 'NagorikPass is not configured yet. Contact the administrator.', email }

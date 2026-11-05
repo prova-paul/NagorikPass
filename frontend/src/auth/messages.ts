@@ -25,6 +25,7 @@ const NOTICES: Record<string, string> = {
   signed_out: 'You have been signed out.',
   no_profile: "Your login isn't set up for NagorikPass yet. Contact HR/Admin.",
   deactivated: 'Your account has been deactivated. Contact HR/Admin.',
+  invite_invalid: 'This invitation link is invalid or has expired. Ask HR/Admin to send a new one.',
 }
 
 /** The notice for a `?reason=` on the login page. Unknown values show nothing, so a link cannot print arbitrary text. */

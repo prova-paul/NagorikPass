@@ -216,7 +216,7 @@ export function finalRows(preview: PreviewRow[], result: ServerResult): FinalRow
 // A spreadsheet program treats a cell that starts with one of these as a formula, so the report disarms it.
 const FORMULA_START = /^[=+\-@\t\r]/
 
-function csvCell(value: string): string {
+export function csvCell(value: string): string {
   const safe = FORMULA_START.test(value) ? `'${value}` : value
   return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe
 }

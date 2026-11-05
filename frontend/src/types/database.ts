@@ -15,6 +15,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          hr_contact_name: string | null
+          hr_contact_phone: string | null
+          id: boolean
+          organization_name: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          hr_contact_name?: string | null
+          hr_contact_phone?: string | null
+          id?: boolean
+          organization_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          hr_contact_name?: string | null
+          hr_contact_phone?: string | null
+          id?: boolean
+          organization_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       card_assignments: {
         Row: {
           card_id: string
@@ -63,6 +98,13 @@ export type Database = {
             columns: ["returned_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_assignments_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visit_overview"
             referencedColumns: ["id"]
           },
           {
@@ -150,6 +192,13 @@ export type Database = {
             foreignKeyName: "notifications_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
+            referencedRelation: "visit_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
             referencedRelation: "visits"
             referencedColumns: ["id"]
           },
@@ -198,6 +247,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: true
             referencedRelation: "employee_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employee_names"
             referencedColumns: ["id"]
           },
           {
@@ -344,6 +400,13 @@ export type Database = {
             foreignKeyName: "visits_invited_by_employee_id_fkey"
             columns: ["invited_by_employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_names"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_invited_by_employee_id_fkey"
+            columns: ["invited_by_employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -383,6 +446,92 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_names: {
+        Row: {
+          full_name: string | null
+          id: string | null
+          team: string | null
+        }
+        Insert: {
+          full_name?: string | null
+          id?: string | null
+          team?: string | null
+        }
+        Update: {
+          full_name?: string | null
+          id?: string | null
+          team?: string | null
+        }
+        Relationships: []
+      }
+      visit_overview: {
+        Row: {
+          actual_guest_count: number | null
+          card_numbers: string | null
+          cards_out: number | null
+          category: Database["public"]["Enums"]["visitor_category"] | null
+          checked_in_at: string | null
+          checked_out_at: string | null
+          company_organization: string | null
+          created_at: string | null
+          first_issued_at: string | null
+          guest_count: number | null
+          host_name: string | null
+          host_team: string | null
+          id: string | null
+          invited_by_employee_id: string | null
+          invited_by_name: string | null
+          last_returned_at: string | null
+          phone: string | null
+          purpose: string | null
+          registered_by: string | null
+          scheduled_arrival_at: string | null
+          scheduled_departure_at: string | null
+          source: Database["public"]["Enums"]["registration_source"] | null
+          status: Database["public"]["Enums"]["visit_status"] | null
+          visit_at: string | null
+          visitor_code: string | null
+          visitor_id: string | null
+          visitor_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_invited_by_employee_id_fkey"
+            columns: ["invited_by_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_invited_by_employee_id_fkey"
+            columns: ["invited_by_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_names"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_invited_by_employee_id_fkey"
+            columns: ["invited_by_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_registered_by_fkey"
+            columns: ["registered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "visitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       admin_create_profile: {
@@ -413,7 +562,14 @@ export type Database = {
         Args: { p_card_returned: boolean; p_visit_id: string }
         Returns: Json
       }
-      import_employees: { Args: { p_rows: Json }; Returns: Json }
+      import_candidates: {
+        Args: { p_default_purpose?: string; p_rows: Json }
+        Returns: Json
+      }
+      import_employees: {
+        Args: { p_can_register_visitors?: boolean; p_rows: Json }
+        Returns: Json
+      }
       mark_account_active: { Args: never; Returns: undefined }
       org_today: { Args: never; Returns: string }
       register_visit: {

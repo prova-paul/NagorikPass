@@ -70,7 +70,8 @@ describe('every protected page checks the role itself', () => {
   })
 
   it('has no page outside the public ones that skips the check', () => {
-    const publicPages = ['app/login/page.tsx', 'app/setup-required/page.tsx', 'app/page.tsx']
+    // The two invitation pages have no role yet: accept is public, set-password checks the session itself.
+    const publicPages = ['app/login/page.tsx', 'app/setup-required/page.tsx', 'app/page.tsx', 'app/auth/accept/page.tsx', 'app/auth/set-password/page.tsx']
     const pages = files(path.join(SRC, 'app')).filter((file) => file.endsWith('page.tsx')).map(rel)
     const unchecked = pages.filter((page) => !publicPages.includes(page.split(path.sep).join('/')) && !/requireRole\('/.test(read(path.join(SRC, page))))
     expect(unchecked).toEqual([])
@@ -80,5 +81,51 @@ describe('every protected page checks the role itself', () => {
     const proxy = read(path.join(SRC, 'proxy.ts'))
     expect(proxy).toMatch(/export async function proxy/)
     expect(proxy).toMatch(/_next\/static/)
+  })
+})
+
+describe('server actions', () => {
+  const actionFiles = files(path.join(SRC, 'app')).filter((file) => file.endsWith('actions.ts') && !file.includes(`${path.sep}auth${path.sep}`))
+
+  it('exist for each module that changes data', () => {
+    expect(actionFiles.map(rel).map((file) => file.split(path.sep).join('/')).sort()).toEqual([
+      'app/admin/cards/actions.ts',
+      'app/admin/employees/actions.ts',
+      'app/admin/receptionists/actions.ts',
+      'app/admin/settings/actions.ts',
+      'app/admin/visitors/actions.ts',
+      'app/employee/actions.ts',
+      'app/reception/actions.ts',
+    ])
+  })
+
+  it.each(actionFiles.map((file) => [rel(file), file]))('%s: every exported action asks who is calling before anything else', (_name, file) => {
+    const source = read(file)
+    expect(source.startsWith("'use server'")).toBe(true)
+    const bodies = source.split(/^export async function /m).slice(1)
+    expect(bodies.length).toBeGreaterThan(0)
+    for (const body of bodies) {
+      const name = body.slice(0, body.indexOf('('))
+      const firstUse = body.search(/\bcontext\.supabase\b|\bsupabase\b/)
+      const check = body.search(/await (admin|reception|employee)Context\(\)/)
+      expect(check, `${name} must check the caller's role first`).toBeGreaterThan(-1)
+      expect(firstUse === -1 || check < firstUse, `${name} must check the caller before using the database`).toBe(true)
+    }
+  })
+
+  it('only the Edge Functions create logins: the app never inserts into profiles or calls the auth admin API', () => {
+    const offenders = sources.filter((file) => /from\('profiles'\)\s*\.(insert|delete|upsert)|auth\.admin\./.test(read(file))).map(rel)
+    expect(offenders).toEqual([])
+  })
+})
+
+describe('server and client components', () => {
+  it('server components do not call helper functions that live in a client component file', () => {
+    // Input.tsx is a client file. Calling controlClass() from it in a server component fails when the page renders,
+    // which no unit test of the component sees. Class helpers live in ui/controlStyles.ts instead.
+    const offenders = sources
+      .filter((file) => !/^\s*['"]use client['"]/.test(read(file)) && /import\s*\{[^}]*\b(controlClass|labelClass|compactLabelClass)\b[^}]*\}\s*from\s*['"][^'"]*\/Input['"]/.test(read(file)))
+      .map(rel)
+    expect(offenders).toEqual([])
   })
 })

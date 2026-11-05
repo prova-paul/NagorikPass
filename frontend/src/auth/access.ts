@@ -52,7 +52,7 @@ export function landingFor(state: SessionState): string {
 
 // What the proxy decides from the request alone. It sees only the cookie, never the database, so it only
 // answers "is there a valid session at all?". Roles are checked on the server, at the data.
-const PUBLIC_PATHS = ['/login', '/setup-required', '/auth/denied']
+const PUBLIC_PATHS = ['/login', '/setup-required', '/auth/denied', '/auth/confirm', '/auth/accept']
 
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))

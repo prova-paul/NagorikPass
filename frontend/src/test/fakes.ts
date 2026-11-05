@@ -52,6 +52,7 @@ export function fakeSupabase(options: FakeOptions = {}) {
         return Promise.resolve({ error: options.signOutError ?? null })
       },
     },
+    rpc: () => Promise.resolve({ data: null, error: null }),
     from: () => ({
       select: () => ({
         eq: () => ({

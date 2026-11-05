@@ -68,3 +68,21 @@ From the repository root: `npm run types:generate` rewrites `src/types/database.
 | `src/screens`, `src/api`, `src/store`, `src/mocks`, `src/components/visits`, `src/layouts`, `src/auth/AuthContext.tsx`, `src/auth/RequireRole.tsx` | **Legacy** code written for the old Express API and react-router. Kept on disk, outside the build, until each part is rewritten. They no longer compile |
 
 Design tokens (royal purple, lavender, white) are in `src/app/globals.css`.
+
+## Running everything locally
+
+```sh
+# 1. Frontend (needs .env.local, see "Set up")
+cd frontend && npm install && npm run dev            # http://localhost:3000
+
+# 2. Checks
+npm run typecheck && npm run lint && npm test && npm run build
+
+# 3. Database tests: PostgreSQL only, no Supabase needed (from the repository root)
+npm run test:db                                      # applies every migration to a scratch database, runs the SQL tests as each role
+npm run test:functions                               # the Edge Function unit tests
+```
+
+The hosted project needs the two pending migrations before the visitor screens can read their data
+(`docs/MIGRATION_PREVIEW_PHASE2.md`, `docs/MIGRATION_PREVIEW_PHASE3.md`). Applying them, deploying the Edge Functions and sending
+invitations are all done by you or on your explicit approval.

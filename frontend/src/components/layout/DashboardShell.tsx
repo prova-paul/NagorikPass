@@ -21,7 +21,7 @@ function SidebarContent({ items, user, onClose }: { items: NavItem[]; user: Curr
   return (
     <div className="flex h-full flex-col bg-navy-950">
       <div className="flex h-16 shrink-0 items-center justify-between px-5">
-        <Link href={ROLE_HOME[user.role]} aria-label="NagorikPass home">
+        <Link href={ROLE_HOME[user.role]} aria-label="NagorikPass home" className="rounded-control focus-visible:outline-white">
           <Logo onDark />
         </Link>
         {onClose && (
@@ -29,7 +29,7 @@ function SidebarContent({ items, user, onClose }: { items: NavItem[]; user: Curr
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-control p-2 text-navy-300 hover:bg-navy-900 hover:text-white"
+            className="rounded-control p-2 text-white hover:bg-navy-900 focus-visible:outline-white"
           >
             <X aria-hidden className="size-5" />
           </button>
@@ -43,12 +43,12 @@ function SidebarContent({ items, user, onClose }: { items: NavItem[]; user: Curr
               key={item.href}
               href={item.href}
               aria-current={active ? 'page' : undefined}
-              className={`flex h-10 items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors ${
-                active ? 'bg-nav-active text-white' : 'text-navy-300 hover:bg-white/10 hover:text-white'
+              className={`flex min-h-10 items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors focus-visible:outline-white ${
+                active ? 'relative bg-nav-active font-semibold text-white before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-white' : 'text-white hover:bg-white/10'
               }`}
             >
               <item.icon aria-hidden className="size-[1.125rem] shrink-0" />
-              <span className="truncate">{item.label}</span>
+              <span className="min-w-0">{item.label}</span>
             </Link>
           )
         })}
@@ -195,7 +195,7 @@ export function DashboardShell({ user, children }: { user: CurrentUser; children
         >
           Skip to main content
         </a>
-        <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">
+        <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block print:hidden">
           <SidebarContent items={items} user={user} />
         </aside>
 
@@ -205,8 +205,8 @@ export function DashboardShell({ user, children }: { user: CurrentUser; children
           </MobileMenu>
         )}
 
-        <div className="lg:pl-64">
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur sm:px-6 lg:px-8">
+        <div className="lg:pl-64 print:pl-0">
+          <header className="sticky top-0 z-10 flex h-16 print:hidden items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur sm:px-6 lg:px-8">
             <button
               type="button"
               onClick={() => setMenuOpen(true)}

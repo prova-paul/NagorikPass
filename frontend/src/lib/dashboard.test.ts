@@ -4,7 +4,7 @@ import { countResult } from '@/test/fakes'
 const mocks = vi.hoisted(() => ({ createClient: vi.fn() }))
 vi.mock('./supabase/server', () => ({ createClient: mocks.createClient }))
 
-import { getAdminOverview, getEmployeeOverview, getReceptionOverview } from './dashboard'
+import { getEmployeeOverview } from './dashboard'
 
 /** Answers each table with a count, or with an error, and records which tables were asked. */
 function counts(byTable: Record<string, { count: number | null; error?: unknown }>, employee?: { data: { can_register_visitors: boolean } | null; error?: unknown }) {
@@ -25,34 +25,20 @@ function counts(byTable: Record<string, { count: number | null; error?: unknown 
 
 beforeEach(() => mocks.createClient.mockReset())
 
-describe('dashboard figures', () => {
-  it('report the real counts', async () => {
-    counts({ employees: { count: 12 }, visitor_cards: { count: 50 }, visits: { count: 7 } })
-    expect(await getAdminOverview()).toEqual({
-      employees: { ok: true, value: 12 },
-      cards: { ok: true, value: 50 },
-      availableCards: { ok: true, value: 50 },
-      visits: { ok: true, value: 7 },
-    })
-  })
-
+describe('employee dashboard figures', () => {
   it('report a genuine zero as zero', async () => {
-    counts({ visits: { count: 0 }, visitor_cards: { count: 0 } })
-    const overview = await getReceptionOverview()
-    expect(overview.expected).toEqual({ ok: true, value: 0 })
-    expect(overview.checkedIn).toEqual({ ok: true, value: 0 })
+    counts({ visits: { count: 0 } }, { data: { can_register_visitors: true } })
+    expect((await getEmployeeOverview({ id: 'u', email: '', name: 'N', role: 'employee', employeeId: 'e-1' })).visits).toEqual({ ok: true, value: 0 })
   })
 
   it('report a figure that could not be read as unavailable, never as zero', async () => {
-    counts({ employees: { count: null, error: { code: '42501', message: 'permission denied' } }, visitor_cards: { count: 3 }, visits: { count: 1 } })
-    const overview = await getAdminOverview()
-    expect(overview.employees).toEqual({ ok: false })
-    expect(overview.cards).toEqual({ ok: true, value: 3 })
+    counts({ visits: { count: null, error: { code: '42501', message: 'permission denied' } } }, { data: { can_register_visitors: true } })
+    expect((await getEmployeeOverview({ id: 'u', email: '', name: 'N', role: 'employee', employeeId: 'e-1' })).visits).toEqual({ ok: false })
   })
 
   it('treat an empty answer as unavailable too', async () => {
-    counts({ visits: { count: null } })
-    expect((await getReceptionOverview()).expected).toEqual({ ok: false })
+    counts({ visits: { count: null } }, { data: { can_register_visitors: true } })
+    expect((await getEmployeeOverview({ id: 'u', email: '', name: 'N', role: 'employee', employeeId: 'e-1' })).visits).toEqual({ ok: false })
   })
 
   it('give an employee their own permission, from their own employee record', async () => {

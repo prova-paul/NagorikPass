@@ -31,7 +31,7 @@ export function SearchInput({
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-9 w-full rounded-control border border-line-strong bg-surface pr-3 pl-9 text-sm outline-none transition-colors placeholder:text-subtle focus:border-primary-500 focus:ring-3 focus:ring-primary-100"
+          className="h-9 w-full rounded-control border border-control-border bg-surface pr-3 pl-9 text-sm outline-none transition-colors placeholder:text-subtle focus:border-primary-500 focus:ring-3 focus:ring-primary-100"
         />
       </div>
     </div>

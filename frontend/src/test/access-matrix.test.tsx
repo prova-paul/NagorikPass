@@ -11,10 +11,14 @@ const mocks = vi.hoisted(() => ({ createClient: vi.fn(), redirect: vi.fn() }))
 vi.mock('@/lib/supabase/server', () => ({ createClient: mocks.createClient, SupabaseConfigError: class extends Error {} }))
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect }))
 vi.mock('@/lib/dashboard', () => ({
-  getAdminOverview: () => Promise.resolve({ employees: { ok: true, value: 12 }, cards: { ok: true, value: 50 }, availableCards: { ok: true, value: 48 }, visits: { ok: true, value: 7 } }),
-  getReceptionOverview: () => Promise.resolve({ expected: { ok: true, value: 3 }, checkedIn: { ok: true, value: 2 }, availableCards: { ok: true, value: 48 } }),
   getEmployeeOverview: () => Promise.resolve({ visits: { ok: true, value: 1 }, permission: { ok: true, canRegisterVisitors: true } }),
 }))
+vi.mock('@/lib/visitQueries', () => ({
+  getAdminDashboard: () => Promise.resolve({ totalVisitors: { ok: true, value: 12 }, expectedToday: { ok: true, value: 1 }, checkedIn: { ok: true, value: 1 }, completed: { ok: true, value: 1 }, activity: [], currentlyIn: [], timeline: [] }),
+  getReceptionHome: () => Promise.resolve({ arrivedToday: { ok: true, value: 3 }, checkedInNow: { ok: true, value: 2 }, checkedOutToday: { ok: true, value: 1 }, list: [] }),
+  listNotifications: () => Promise.resolve({ ok: true, value: [] }),
+}))
+vi.mock('@/components/ui/AutoRefresh', () => ({ AutoRefresh: () => null }))
 // The shell is a client component that needs the browser; the layouts' decisions are what is under test.
 vi.mock('@/components/layout/DashboardShell', () => ({ DashboardShell: () => null }))
 

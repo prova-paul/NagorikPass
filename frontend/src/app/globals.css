@@ -28,10 +28,18 @@
   --color-surface-muted: #f8f7fe;
   --color-line: #e6e3f7;
   --color-line-strong: #cfcbea;
+  /* A form control's or switch's edge: lavender, dark enough for 3:1 on white (WCAG 1.4.11). */
+  --color-control-border: #8c83bb;
 
   --color-ink: #171329;
   --color-muted: #5e5d7a;
   --color-subtle: #77738c;
+
+  /* Solid status colors from the design system, for fills and edges. The -600 shades are their darker versions for small text. */
+  --color-success: #16a36a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc3545;
+  --color-info: #2563eb;
 
   --color-success-50: #e7f7ee;
   --color-success-600: #17723f;
@@ -45,9 +53,9 @@
   --color-neutral-100: #efeef5;
   --color-neutral-600: #55546e;
 
-  /* Checked with the data-viz palette validator for colour-blind separation. */
+  /* Two purples far apart in lightness, so they differ without relying on hue. Bars also differ by position. */
   --color-chart-arrivals: #45239b;
-  --color-chart-departures: #0f9d8a;
+  --color-chart-departures: #7a67af;
 
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
@@ -67,6 +75,12 @@
 @layer base {
   body {
     @apply bg-canvas text-ink font-sans antialiased;
+  }
+
+  @media print {
+    body {
+      background: var(--color-white);
+    }
   }
 
   html:has(dialog[open]) {

@@ -61,15 +61,48 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('DashboardShell navigation', () => {
-  it.each(ROLES)('%s sees only their own Dashboard link, and no other role’s pages', (role) => {
+  it.each([
+    ['receptionist', ['/reception', '/reception/expected', '/reception/new'], ['Home', 'Expected Visitors', 'Add New Visitor']],
+    ['employee', ['/employee', '/employee/visitors/new', '/employee/visitors'], ['Dashboard', 'Add New Visitor', 'My Visitors']],
+  ] as const)('%s sees their own pages, in the PRD order, and no other role’s', (role, hrefs, labels) => {
     mocks.pathname = ROLE_HOME[role]
     show(role)
     const main = screen.getAllByRole('navigation', { name: 'Main' })[0]
     const links = within(main).getAllByRole('link')
-    expect(links.map((link) => link.getAttribute('href'))).toEqual([ROLE_HOME[role]])
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(hrefs)
+    expect(links.map((link) => link.textContent)).toEqual(labels)
     expect(links[0].getAttribute('aria-current')).toBe('page')
     for (const other of ROLES.filter((candidate) => candidate !== role)) {
       expect(document.querySelector(`a[href^="${ROLE_HOME[other]}"]`)).toBeNull()
+    }
+  })
+
+  it('gives HR/Admin every module in the PRD, in order', () => {
+    mocks.pathname = '/admin'
+    show('admin')
+    const main = screen.getAllByRole('navigation', { name: 'Main' })[0]
+    const labels = ['Dashboard', 'Visitor Management', 'Visitor Approval', 'Visitor History', 'Visitor Cards', 'Employee Management', 'Receptionist Management', 'Reports', 'Settings']
+    expect(within(main).getAllByText(new RegExp(`^(${labels.join('|')})$`)).map((node) => node.textContent)).toEqual(labels)
+    expect(within(main).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/admin', '/admin/visitors', '/admin/approvals', '/admin/history', '/admin/cards', '/admin/employees', '/admin/receptionists', '/admin/reports', '/admin/settings',
+    ])
+  })
+
+  it('marks the section current while on one of its pages', () => {
+    mocks.pathname = '/admin/employees/abc'
+    show('admin')
+    expect(screen.getAllByRole('link', { name: 'Employee Management' })[0].getAttribute('aria-current')).toBe('page')
+    expect(screen.getAllByRole('link', { name: 'Dashboard' })[0].getAttribute('aria-current')).toBeNull()
+  })
+
+  it('never shows HR/Admin modules to the other roles', () => {
+    for (const role of ['receptionist', 'employee'] as const) {
+      mocks.pathname = ROLE_HOME[role]
+      show(role)
+      expect(screen.queryByText('Employee Management')).toBeNull()
+      expect(screen.queryByText('Receptionist Management')).toBeNull()
+      expect(screen.queryByText('Visitor Cards')).toBeNull()
+      cleanup()
     }
   })
 

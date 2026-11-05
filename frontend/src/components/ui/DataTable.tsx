@@ -74,7 +74,7 @@ export function DataTable<Row>({
           {rows.map((row) => (
             <tr key={getRowKey(row)} className="transition-colors hover:bg-surface-muted">
               {columns.map((column) => (
-                <td key={column.header} className={`px-3 py-4 align-middle wrap-anywhere first:pl-5 last:pr-5 ${column.className ?? ''}`}>
+                <td key={column.header} className={`px-3 py-4 align-middle wrap-break-word first:pl-5 last:pr-5 ${column.className ?? ''}`}>
                   {column.render(row)}
                 </td>
               ))}
