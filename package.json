@@ -7,6 +7,9 @@
     "test:functions": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON supabase/functions/_shared/",
     "typecheck:functions": "frontend/node_modules/.bin/tsc -p supabase/functions/tsconfig.json && frontend/node_modules/.bin/tsc -p supabase/functions/tsconfig.test.json",
     "test:import-parity": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON supabase/tests/import_parity.mjs",
-    "types:generate": "supabase gen types --remote --schema public > frontend/src/types/database.ts"
+    "types:generate": "supabase gen types --remote --schema public > frontend/src/types/database.ts",
+    "test:e2e-stack": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON supabase/tests/e2e/stack.mjs",
+    "test:e2e-api": "node supabase/tests/e2e/api-security.mjs",
+    "test:seed": "supabase/tests/seed/run.sh"
   }
 }

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NagorikPass — Project Design</title>
+<style>
+  :root {
+    --primary: #2c1971; --primary-hover: #45239b; --secondary: #7a67af; --lavender: #dfddf7; --bg: #f3f2fd;
+    --surface: #fff; --text: #171329; --muted: #5e5d7a; --line: #e6e3f7; --edge: #8c83bb;
+    --success: #16a36a; --success-bg: #e7f7ee; --warning: #f59e0b; --warning-bg: #fdf3df; --warning-text: #975405;
+    --danger: #dc3545; --danger-bg: #fdecec; --danger-text: #bf2626;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--primary); color: #fff; padding: 22px clamp(16px, 4vw, 40px) 0; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 38px; height: 38px; border-radius: 10px; background: #fff; color: var(--primary); display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+  header p { margin: 4px 0 0; color: var(--lavender); font-size: 14px; }
+  nav { display: flex; gap: 4px; margin-top: 18px; }
+  nav button { appearance: none; border: 0; background: transparent; color: #fff; font: inherit; font-weight: 600; padding: 11px 20px; border-radius: 10px 10px 0 0; cursor: pointer; }
+  nav button:hover { background: rgba(255,255,255,.12); }
+  nav button[aria-selected="true"] { background: var(--bg); color: var(--primary); }
+  nav button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 40px) 56px; }
+  section[hidden] { display: none; }
+  h2 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
+  h3 { font-size: 16px; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 18px; max-width: 78ch; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 22px; box-shadow: 0 1px 2px rgb(44 25 113 / .05), 0 2px 8px rgb(44 25 113 / .05); }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #fcfcff; }
+  .scroll svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .sw { width: 18px; height: 12px; border-radius: 3px; border: 2px solid var(--secondary); background: #fff; display: inline-block; }
+  .sw.decision { background: var(--bg); border-color: var(--primary); transform: rotate(0); }
+  .sw.end { background: var(--success-bg); border-color: var(--success); }
+  .sw.deny { background: var(--danger-bg); border-color: var(--danger); }
+  .sw.flag { border-style: dashed; border-color: var(--warning); background: var(--warning-bg); }
+  .notice { border-radius: 12px; padding: 12px 14px; margin: 14px 0 0; font-size: 14px; border: 1px solid; }
+  .notice.warn { background: var(--warning-bg); border-color: #f3d9a4; color: #5c3a02; }
+  .notice.info { background: var(--bg); border-color: var(--lavender); color: var(--text); }
+  .notice strong { color: inherit; }
+  ol.steps { margin: 14px 0 0; padding-left: 22px; }
+  ol.steps li { margin: 5px 0; }
+  ol.steps li small { color: var(--muted); }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .tbl { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #fcfcff; }
+  .tbl h3 { display: flex; align-items: center; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--primary); }
+  .tbl p { margin: 0; color: var(--muted); font-size: 14px; }
+  .tag { font: 700 10px/1 ui-sans-serif, system-ui; letter-spacing: .05em; padding: 3px 6px; border-radius: 6px; background: var(--lavender); color: var(--primary); }
+  table.rel { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.rel th, table.rel td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.rel th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: #f8f7fe; }
+  table.rel td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; white-space: nowrap; }
+  .cardn { display: inline-block; font: 700 12px ui-sans-serif, system-ui; background: var(--lavender); color: var(--primary); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+  details { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcff; }
+  summary { cursor: pointer; padding: 12px 16px; font-weight: 600; color: var(--primary); }
+  summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 12px; }
+  details .body { padding: 0 16px 14px; overflow-x: auto; }
+  footer { color: var(--muted); font-size: 13px; text-align: center; padding: 0 16px 30px; }
+  @media (max-width: 640px) { nav button { padding: 10px 12px; font-size: 14px; } .scroll svg { min-width: 880px; } #er-wrap svg { min-width: 980px; } }
+  @media print { nav, .no-print { display: none; } section[hidden] { display: block !important; } header { background: none; color: #000; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">N</div>
+    <div>
+      <h1>NagorikPass — Project Design</h1>
+      <p>Visitor Management System: workflows and database design</p>
+    </div>
+  </div>
+  <nav role="tablist" aria-label="Design sections">
+    <button role="tab" id="tab-workflow" aria-controls="panel-workflow" aria-selected="true">Workflow</button>
+    <button role="tab" id="tab-database" aria-controls="panel-database" aria-selected="false" tabindex="-1">Database Design</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============================ SECTION 1 ============================ -->
+<section id="panel-workflow" role="tabpanel" aria-labelledby="tab-workflow">
+  <h2>Project Workflow</h2>
+  <p class="lead">Two ways a visitor reaches the building. Each diagram is a swimlane: the row says who does the step, and arrows show the order.</p>
+
+  <div class="card">
+    <h3>1. Expected visitor</h3>
+    <p class="lead">HR/Admin registers the visitor before the visit. The receptionist already has them on the Expected list, so arrival is a verify, check-in and card hand-over. Check-out is complete only when the card is back.</p>
+    <div class="scroll"><div id="flow1" role="img" aria-label="Swimlane flowchart of the expected visitor workflow, described in the steps below"></div></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="sw"></i>Step</span><span><i class="sw decision"></i>Decision</span><span><i class="sw end"></i>Outcome</span><span><i class="sw deny"></i>Denied</span><span><i class="sw flag"></i>Differs from the PRD (see note)</span>
+    </div>
+    <ol class="steps">
+      <li>HR/Admin registers the visitor in advance. The system saves the visit as <b>Expected</b>.</li>
+      <li>The visitor receives an invitation email. <small>(Requested for this design; see the note below.)</small></li>
+      <li>On arrival the receptionist finds the visitor on the Expected list and verifies who they are.</li>
+      <li>The receptionist selects an <b>Available</b> card and clicks Check-in. The visit becomes <b>Checked In</b> and the card <b>Issued</b>; HR/Admin is notified.</li>
+      <li>At the end of the visit the visitor returns the card, and the receptionist is asked <em>“Did you get the visitor card back?”</em></li>
+      <li><b>Yes</b>: the visit becomes <b>Checked Out</b> and the card <b>Available</b>. <b>No</b>: the visitor stays Checked In and the card stays Issued until it is recovered.</li>
+    </ol>
+    <div class="notice warn"><strong>Not in the PRD:</strong> the PRD sends invitation emails only for employee and receptionist <em>accounts</em>. It does not describe an email to the visitor, and the app does not send one. It is drawn here because it was requested, and would need a decision before it is built.</div>
+  </div>
+
+  <div class="card">
+    <h3>2. Unexpected visitor (walk-in), as requested</h3>
+    <p class="lead">The receptionist registers someone who arrived without notice and asks the named employee to approve before letting them in.</p>
+    <div class="scroll"><div id="flow2" role="img" aria-label="Swimlane flowchart of the unexpected visitor workflow with employee approval, described in the steps below"></div></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="sw"></i>Step</span><span><i class="sw decision"></i>Decision</span><span><i class="sw end"></i>Outcome</span><span><i class="sw deny"></i>Denied</span><span><i class="sw flag"></i>Differs from the PRD (see note)</span>
+    </div>
+    <ol class="steps">
+      <li>The receptionist enters the visitor’s <b>name</b>, <b>phone number</b>, <b>purpose</b> and the <b>employee</b> they want to see.</li>
+      <li>The system emails that employee asking for approval.</li>
+      <li>The employee approves or rejects.</li>
+      <li><b>Approved</b>: the receptionist checks the visitor in and issues a card.</li>
+      <li><b>Rejected</b>: the visitor is denied entry.</li>
+    </ol>
+    <div class="notice warn"><strong>Conflicts with the PRD.</strong> Section 5 (Workflow C) and section 7 say: <em>“Unscheduled visitors do not require additional employee approval after registration”</em> and <em>“Once a visitor entry has been added to the system, no additional employee approval is required for check-in.”</em> The receptionist searches for the host, or records the name HR/Admin confirmed in <b>Invited By</b>, and checks the visitor in straight away. The approval steps above are not built, and the database has no approval table or Rejected status. This diagram shows your requested design, not the current behaviour. If it is wanted, it changes a business rule, so it needs a decision first.</div>
+    <details>
+      <summary>How the PRD describes this workflow (what the app does today)</summary>
+      <div class="body"><div class="scroll"><div id="flow2b" role="img" aria-label="Swimlane flowchart of the unscheduled visitor workflow as the PRD describes it"></div></div>
+      <p class="lead" style="margin-top:12px">The receptionist registers the visitor, searches for the employee, records the confirmed name in Invited By when the employee is not found, checks the visitor in, and HR/Admin is notified. No approval step exists.</p></div>
+    </details>
+  </div>
+</section>
+
+<!-- ============================ SECTION 2 ============================ -->
+<section id="panel-database" role="tabpanel" aria-labelledby="tab-database" hidden>
+  <h2>Database Design</h2>
+  <p class="lead">Six tables as requested. <b>PK</b> marks a primary key, <b>FK</b> a foreign key. A line with a bar at one end and a three-pronged foot at the other is a <b>one-to-many</b> relationship: one row on the bar side relates to many rows on the foot side.</p>
+
+  <div class="card">
+    <div class="scroll" id="er-wrap"><div id="er" role="img" aria-label="Entity relationship diagram of the six tables, described in the list below"></div></div>
+    <div class="legend" aria-hidden="true"><span><b style="color:var(--primary)">PK</b> primary key</span><span><b style="color:var(--secondary)">FK</b> foreign key</span><span>| one</span><span>⋔ many</span></div>
+    <div class="notice info"><strong>Added for traceability:</strong> <code>visits.registered_by</code> is not in the list you gave. Without it nothing records which HR/Admin or receptionist account entered the visit. Remove it if you do not want it.</div>
+  </div>
+
+  <div class="card">
+    <h3>What each table is for</h3>
+    <div class="grid">
+      <div class="tbl"><h3>users <span class="tag">ACCOUNTS</span></h3><p>The people who sign in to run the system: HR/Admin and receptionist accounts, with their role and whether the account is active.</p></div>
+      <div class="tbl"><h3>employees <span class="tag">DIRECTORY</span></h3><p>The organization’s staff: name, team and email. A visitor comes to see one employee, who is the host. Receptionists should see only name and team.</p></div>
+      <div class="tbl"><h3>visitors <span class="tag">PEOPLE</span></h3><p>One row per person who visits: name and phone. A returning visitor keeps one row and gets a new visit each time.</p></div>
+      <div class="tbl"><h3>visits <span class="tag">CORE</span></h3><p>One row per occasion: who, whom they see, why, and the status with the expected arrival, check-in and check-out times. Status moves Expected, then Checked In, then Checked Out.</p></div>
+      <div class="tbl"><h3>visitor_cards <span class="tag">CARDS</span></h3><p>The cards given out at check-in, as requested: the card number, the visit it was issued for, and when it was issued and returned. A card with no return time is still out.</p></div>
+      <div class="tbl"><h3>approvals <span class="tag">APPROVAL</span></h3><p>For the walk-in design above: the employee’s decision about a visit, and when they made it. Needed only if employee approval is adopted.</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Relationships</h3>
+    <div style="overflow-x:auto">
+    <table class="rel">
+      <thead><tr><th>Link</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>users → visits<br>(registered_by)</td><td><span class="cardn">1 : N</span></td><td>One account can register many visits. Each visit records the account that entered it.</td></tr>
+        <tr><td>visitors → visits<br>(visitor_id)</td><td><span class="cardn">1 : N</span></td><td>One person can visit many times. Each visit belongs to exactly one visitor.</td></tr>
+        <tr><td>employees → visits<br>(employee_id)</td><td><span class="cardn">1 : N</span></td><td>One employee can host many visits. Each visit names one host.</td></tr>
+        <tr><td>visits → visitor_cards<br>(visit_id)</td><td><span class="cardn">1 : N</span></td><td>A visit can use more than one card (a group). A card row belongs to one visit; the same card number can appear again on a later visit once it is returned.</td></tr>
+        <tr><td>visits → approvals<br>(visit_id)</td><td><span class="cardn">1 : N</span></td><td>A visit can have approval records. Normally one decision; more than one if a request is repeated.</td></tr>
+        <tr><td>employees → approvals<br>(employee_id)</td><td><span class="cardn">1 : N</span></td><td>One employee can decide on many visits. Each approval belongs to the employee who must decide.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3>This design and the database that is built</h3>
+    <p class="lead">The six tables are the design you asked for. The database the app uses today is close but not the same, and this document does not change it.</p>
+    <details open>
+      <summary>Where the built database differs</summary>
+      <div class="body">
+      <table class="rel">
+        <thead><tr><th>This design</th><th>Built database</th></tr></thead>
+        <tbody>
+          <tr><td>users</td><td><code>profiles</code>, linked to Supabase Auth. It holds the role (HR/Admin, receptionist or employee) and the active flag. Employees can also sign in.</td></tr>
+          <tr><td>employees</td><td>Adds Employee ID, designation, phone, active, and a <code>can_register_visitors</code> permission. Receptionists read only name and team, through a view.</td></tr>
+          <tr><td>visitors</td><td>Adds a Visitor ID (V-1001…). Name and phone together identify the person.</td></tr>
+          <tr><td>visits</td><td>Adds the visitor type, guest counts, company, Invited By (an employee or a typed name), and who registered it. Status is Expected, Checked In or Checked Out only.</td></tr>
+          <tr><td>visitor_cards</td><td>Only the card number and its current status (Available or Issued). Issue and return times live in a separate <code>card_assignments</code> table, which keeps the full history and is never deleted.</td></tr>
+          <tr><td>approvals</td><td>No such table. The PRD says no approval is needed for employee-registered or walk-in visitors. There is no Rejected status.</td></tr>
+          <tr><td>(not in this design)</td><td><code>notifications</code> (check-in alerts for HR/Admin and the registering employee) and <code>app_settings</code>.</td></tr>
+        </tbody>
+      </table></div>
+    </details>
+  </div>
+</section>
+</main>
+<footer>NagorikPass — design reference. Requirements come from the project PRD; this file changes no application code.</footer>
+
+<script>
+(function () {
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  var C = { primary: '#2c1971', secondary: '#7a67af', lavender: '#dfddf7', bg: '#f3f2fd', text: '#171329', muted: '#5e5d7a', line: '#cfcbea',
+            success: '#16a36a', successBg: '#e7f7ee', danger: '#dc3545', dangerBg: '#fdecec', warn: '#f59e0b', warnBg: '#fdf3df' };
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function wrap(text, max) {
+    var words = text.split(' '), lines = [], line = '';
+    words.forEach(function (w) {
+      if ((line + ' ' + w).trim().length > max && line) { lines.push(line); line = w; } else { line = (line + ' ' + w).trim(); }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+  function textBlock(cx, cy, lines, size, fill, weight) {
+    var lh = size * 1.25, y0 = cy - ((lines.length - 1) * lh) / 2 + size * 0.35, out = '';
+    lines.forEach(function (l, i) { out += '<text x="' + cx + '" y="' + (y0 + i * lh) + '" text-anchor="middle" font-size="' + size + '" fill="' + fill + '" font-weight="' + (weight || 500) + '">' + esc(l) + '</text>'; });
+    return out;
+  }
+
+  /* ---------- Swimlane flowchart ---------- */
+  function flow(el, spec) {
+    var laneH = spec.laneH || 112, colW = spec.colW || 160, nodeW = spec.nodeW || 138, nodeH = 58, decW = spec.decW || 150, decH = 82,
+        labelW = 112, padR = 24, top = 8;
+    var W = labelW + spec.cols * colW + padR, H = top + spec.lanes.length * laneH + 8;
+    var pos = {};
+    spec.nodes.forEach(function (n) {
+      var dec = n.type === 'decision';
+      pos[n.id] = { x: labelW + n.col * colW + colW / 2, y: top + n.lane * laneH + laneH / 2, w: dec ? decW : nodeW, h: dec ? decH : nodeH, n: n };
+    });
+    var s = '<svg xmlns="' + NS + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="Inter, ui-sans-serif, system-ui, sans-serif">';
+    s += '<defs><marker id="ar-' + spec.id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="' + C.primary + '"/></marker></defs>';
+    spec.lanes.forEach(function (name, i) {
+      var y = top + i * laneH;
+      s += '<rect x="0" y="' + y + '" width="' + W + '" height="' + laneH + '" fill="' + (i % 2 ? '#f8f7fe' : '#fff') + '" stroke="' + C.lavender + '"/>';
+      s += '<rect x="0" y="' + y + '" width="' + labelW + '" height="' + laneH + '" fill="' + C.lavender + '"/>';
+      s += textBlock(labelW / 2, y + laneH / 2, wrap(name, 11), 13, C.primary, 700);
+    });
+    function anchor(p, side) {
+      return side === 'r' ? [p.x + p.w / 2, p.y] : side === 'l' ? [p.x - p.w / 2, p.y] : side === 't' ? [p.x, p.y - p.h / 2] : [p.x, p.y + p.h / 2];
+    }
+    spec.edges.forEach(function (e) {
+      var a = pos[e.from], b = pos[e.to], fs = e.fs || 'r', ts = e.ts || 'l', p0 = anchor(a, fs), p1 = anchor(b, ts), pts = [p0];
+      var horizFirst = (fs === 'r' || fs === 'l');
+      if (horizFirst && (ts === 'l' || ts === 'r')) {
+        if (Math.abs(p0[1] - p1[1]) > 1) { var mx = (p0[0] + p1[0]) / 2; pts.push([mx, p0[1]], [mx, p1[1]]); }
+      } else if (horizFirst) { pts.push([p1[0], p0[1]]); }
+      else if (ts === 't' || ts === 'b') { if (Math.abs(p0[0] - p1[0]) > 1) { var my = (p0[1] + p1[1]) / 2; pts.push([p0[0], my], [p1[0], my]); } }
+      else { pts.push([p0[0], p1[1]]); }
+      pts.push(p1);
+      var d = 'M' + pts.map(function (q) { return q[0] + ',' + q[1]; }).join(' L');
+      var dash = e.dashed ? ' stroke-dasharray="6 4"' : '';
+      s += '<path d="' + d + '" fill="none" stroke="' + C.primary + '" stroke-width="2"' + dash + ' marker-end="url(#ar-' + spec.id + ')"/>';
+      if (e.label) {
+        var best = 0, bi = 0, i;
+        for (i = 0; i < pts.length - 1; i++) { var len = Math.abs(pts[i][0] - pts[i + 1][0]) + Math.abs(pts[i][1] - pts[i + 1][1]); if (len > best) { best = len; bi = i; } }
+        var lx = (pts[bi][0] + pts[bi + 1][0]) / 2, ly = (pts[bi][1] + pts[bi + 1][1]) / 2;
+        var vertical = Math.abs(pts[bi][0] - pts[bi + 1][0]) < 1;
+        s += '<text x="' + (vertical ? lx + 8 : lx) + '" y="' + (vertical ? ly + 4 : ly - 7) + '" text-anchor="' + (vertical ? 'start' : 'middle') + '" font-size="12" font-weight="700" fill="' + C.primary + '" stroke="#fff" stroke-width="4" paint-order="stroke">' + esc(e.label) + '</text>';
+      }
+    });
+    spec.nodes.forEach(function (n) {
+      var p = pos[n.id], t = n.type || 'step', fill = '#fff', stroke = C.secondary, dash = '', tf = C.text;
+      if (t === 'decision') { fill = C.bg; stroke = C.primary; }
+      if (t === 'end') { fill = C.successBg; stroke = C.success; }
+      if (t === 'deny') { fill = C.dangerBg; stroke = C.danger; }
+      if (n.flag) { stroke = C.warn; dash = ' stroke-dasharray="5 3"'; if (t === 'step') fill = C.warnBg; }
+      if (t === 'decision') {
+        s += '<polygon points="' + p.x + ',' + (p.y - p.h / 2) + ' ' + (p.x + p.w / 2) + ',' + p.y + ' ' + p.x + ',' + (p.y + p.h / 2) + ' ' + (p.x - p.w / 2) + ',' + p.y + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="2"' + dash + '/>';
+        s += textBlock(p.x, p.y, wrap(n.text, 15), 12, tf, 600);
+      } else {
+        s += '<rect x="' + (p.x - p.w / 2) + '" y="' + (p.y - p.h / 2) + '" width="' + p.w + '" height="' + p.h + '" rx="10" fill="' + fill + '" stroke="' + stroke + '" stroke-width="2"' + dash + '/>';
+        s += textBlock(p.x, p.y, wrap(n.text, 21), 12.5, tf, 500);
+      }
+      if (n.num) { s += '<circle cx="' + (p.x - p.w / 2 + 2) + '" cy="' + (p.y - p.h / 2 + 2) + '" r="10" fill="' + C.primary + '"/><text x="' + (p.x - p.w / 2 + 2) + '" y="' + (p.y - p.h / 2 + 6) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">' + n.num + '</text>'; }
+    });
+    s += '</svg>';
+    el.innerHTML = s;
+  }
+
+  flow(document.getElementById('flow1'), {
+    id: 'f1', cols: 8, lanes: ['HR/Admin', 'System', 'Visitor', 'Receptionist'], colW: 165, nodeW: 132, decW: 124,
+    nodes: [
+      { id: 'a', lane: 0, col: 0, num: 1, text: 'Registers the visitor in advance' },
+      { id: 'b', lane: 1, col: 1, text: 'Saves the visit as Expected' },
+      { id: 'c', lane: 2, col: 2, num: 2, flag: true, text: 'Receives an invitation email' },
+      { id: 'd', lane: 3, col: 3, num: 3, text: 'Verifies the visitor on arrival' },
+      { id: 'e', lane: 3, col: 4, num: 4, text: 'Picks an Available card and checks in' },
+      { id: 'g', lane: 2, col: 5, num: 5, text: 'Returns the card at the end of the visit' },
+      { id: 'h', lane: 3, col: 6, type: 'decision', text: 'Card back?' },
+      { id: 'i', lane: 3, col: 7, num: 6, type: 'end', text: 'Checks out; card Available' },
+      { id: 'j', lane: 1, col: 6, text: 'Stays Checked In; card stays Issued' }
+    ],
+    edges: [
+      { from: 'a', to: 'b', fs: 'r', ts: 't' }, { from: 'b', to: 'c', fs: 'r', ts: 't' }, { from: 'c', to: 'd', fs: 'r', ts: 't' },
+      { from: 'd', to: 'e' }, { from: 'e', to: 'g', fs: 'r', ts: 'b' }, { from: 'g', to: 'h', fs: 'r', ts: 'l' },
+      { from: 'h', to: 'i', fs: 'r', ts: 'l', label: 'Yes' }, { from: 'h', to: 'j', fs: 't', ts: 'b', label: 'No' },
+      { from: 'j', to: 'g', fs: 'l', ts: 't', label: 'Recover card', dashed: true }
+    ]
+  });
+
+  flow(document.getElementById('flow2'), {
+    id: 'f2', cols: 4, lanes: ['Receptionist', 'System', 'Employee', 'Visitor'], colW: 230, nodeW: 180,
+    nodes: [
+      { id: 'a', lane: 0, col: 0, num: 1, text: 'Enters name, phone, purpose and the employee to visit' },
+      { id: 'b', lane: 1, col: 1, num: 2, flag: true, text: 'Emails the employee for approval' },
+      { id: 'c', lane: 2, col: 2, num: 3, type: 'decision', flag: true, text: 'Employee decides' },
+      { id: 'd', lane: 0, col: 3, num: 4, type: 'end', text: 'Receptionist checks in the visitor and issues a card' },
+      { id: 'e', lane: 3, col: 3, num: 5, type: 'deny', flag: true, text: 'Visitor is denied entry' }
+    ],
+    edges: [
+      { from: 'a', to: 'b', fs: 'r', ts: 't' }, { from: 'b', to: 'c', fs: 'r', ts: 't' },
+      { from: 'c', to: 'd', fs: 'r', ts: 'b', label: 'Approves' }, { from: 'c', to: 'e', fs: 'b', ts: 'l', label: 'Rejects' }
+    ]
+  });
+
+  flow(document.getElementById('flow2b'), {
+    id: 'f3', cols: 5, lanes: ['Receptionist', 'System', 'HR/Admin'], colW: 190, nodeW: 160,
+    nodes: [
+      { id: 'a', lane: 0, col: 0, text: 'Registers the visitor (name, phone, purpose)' },
+      { id: 'b', lane: 0, col: 1, text: 'Searches for the employee to meet' },
+      { id: 'c', lane: 0, col: 2, type: 'decision', text: 'Employee found?' },
+      { id: 'd', lane: 2, col: 2, text: 'Confirms the employee by phone or call' },
+      { id: 'e', lane: 0, col: 3, text: 'Records the host, or the confirmed name in Invited By' },
+      { id: 'f', lane: 0, col: 4, type: 'end', text: 'Checks the visitor in, with a card' },
+      { id: 'g', lane: 1, col: 4, text: 'Records the visit and notifies HR/Admin' }
+    ],
+    edges: [
+      { from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'c', to: 'e', label: 'Yes' },
+      { from: 'c', to: 'd', fs: 'b', ts: 't', label: 'No' }, { from: 'd', to: 'e', fs: 'r', ts: 'b' },
+      { from: 'e', to: 'f' }, { from: 'f', to: 'g', fs: 'b', ts: 't' }
+    ]
+  });
+
+  /* ---------- Entity relationship diagram ---------- */
+  var ROW = 26, HEAD = 36;
+  var T = {
+    users:         { x: 30,  y: 30,  w: 270, sub: 'HR/Admin and receptionist accounts', cols: [['id', 'uuid', 'PK'], ['full_name', 'text', ''], ['email', 'text', ''], ['role', 'admin | receptionist', ''], ['active', 'boolean', '']] },
+    employees:     { x: 800, y: 30,  w: 270, sub: 'Staff who host visitors', cols: [['id', 'uuid', 'PK'], ['full_name', 'text', ''], ['team', 'text', ''], ['email', 'text', ''], ['active', 'boolean', '']] },
+    visitors:      { x: 30,  y: 250, w: 270, sub: 'People who visit', cols: [['id', 'uuid', 'PK'], ['full_name', 'text', ''], ['phone', 'text', '']] },
+    visits:        { x: 420, y: 190, w: 280, sub: 'One row per occasion', cols: [['id', 'uuid', 'PK'], ['visitor_id', 'uuid', 'FK'], ['employee_id', 'uuid', 'FK'], ['registered_by', 'uuid', 'FK'], ['purpose', 'text', ''], ['status', 'enum (3 states)', ''], ['expected_arrival', 'timestamptz', ''], ['checked_in_at', 'timestamptz', ''], ['checked_out_at', 'timestamptz', '']] },
+    visitor_cards: { x: 420, y: 530, w: 280, sub: 'Cards issued per visit', cols: [['id', 'uuid', 'PK'], ['card_number', 'text', ''], ['visit_id', 'uuid', 'FK'], ['issued_at', 'timestamptz', ''], ['returned_at', 'timestamptz', '']] },
+    approvals:     { x: 800, y: 350, w: 270, sub: 'Employee decision on a visit', cols: [['id', 'uuid', 'PK'], ['visit_id', 'uuid', 'FK'], ['employee_id', 'uuid', 'FK'], ['decision', 'approved | rejected', ''], ['decided_at', 'timestamptz', '']] }
+  };
+  Object.keys(T).forEach(function (k) { T[k].h = HEAD + T[k].cols.length * ROW; });
+  function rowY(t, col) { var i = T[t].cols.findIndex(function (c) { return c[0] === col; }); return T[t].y + HEAD + i * ROW + ROW / 2; }
+  function L(t) { return T[t].x; } function R(t) { return T[t].x + T[t].w; } function MID(t) { return T[t].x + T[t].w / 2; }
+
+  function one(x, y, ox, oy) { var px = -oy, py = ox, a = 11; return '<line x1="' + (x + ox * a + px * 8) + '" y1="' + (y + oy * a + py * 8) + '" x2="' + (x + ox * a - px * 8) + '" y2="' + (y + oy * a - py * 8) + '" stroke="' + C.primary + '" stroke-width="2.4"/>'; }
+  function many(x, y, ox, oy) { var px = -oy, py = ox, a = 14, w = 8, o = ''; [[1, 1], [0, 0], [-1, -1]].forEach(function (k) { o += '<line x1="' + (x + ox * a) + '" y1="' + (y + oy * a) + '" x2="' + (x + k[0] * px * w) + '" y2="' + (y + k[0] * py * w) + '" stroke="' + C.primary + '" stroke-width="2.4"/>'; }); return o; }
+  function rel(pts, parent, child, label, lseg) {
+    var d = 'M' + pts.map(function (p) { return p[0] + ',' + p[1]; }).join(' L'), n = pts.length;
+    var s = '<path d="' + d + '" fill="none" stroke="' + C.primary + '" stroke-width="2"/>';
+    s += one(pts[0][0], pts[0][1], parent[0], parent[1]) + many(pts[n - 1][0], pts[n - 1][1], child[0], child[1]);
+    var a = pts[lseg], b = pts[lseg + 1], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, vert = Math.abs(a[0] - b[0]) < 1;
+    return s + '<text x="' + (vert ? mx + 8 : mx) + '" y="' + (vert ? my + 4 : my - 7) + '" text-anchor="' + (vert ? 'start' : 'middle') + '" font-size="12" font-style="italic" font-weight="600" fill="' + C.muted + '" stroke="#fff" stroke-width="4" paint-order="stroke">' + esc(label) + '</text>';
+  }
+
+  function er() {
+    var W = 1100, H = 700, s = '<svg xmlns="' + NS + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="Inter, ui-sans-serif, system-ui, sans-serif">';
+    // relationship lines first, so tables sit on top
+    s += rel([[R('users'), rowY('users', 'id')], [360, rowY('users', 'id')], [360, rowY('visits', 'registered_by')], [L('visits'), rowY('visits', 'registered_by')]], [1, 0], [-1, 0], 'registers', 0);
+    s += rel([[R('visitors'), rowY('visitors', 'id')], [385, rowY('visitors', 'id')], [385, rowY('visits', 'visitor_id')], [L('visits'), rowY('visits', 'visitor_id')]], [1, 0], [-1, 0], 'visits as', 0);
+    s += rel([[L('employees'), rowY('employees', 'id')], [735, rowY('employees', 'id')], [735, rowY('visits', 'employee_id')], [R('visits'), rowY('visits', 'employee_id')]], [-1, 0], [1, 0], 'hosts', 1);
+    s += rel([[R('visits'), rowY('visits', 'id')], [780, rowY('visits', 'id')], [780, rowY('approvals', 'visit_id')], [L('approvals'), rowY('approvals', 'visit_id')]], [1, 0], [-1, 0], 'needs', 1);
+    s += rel([[MID('employees') + 40, T.employees.y + T.employees.h], [MID('employees') + 40, T.approvals.y]], [0, 1], [0, -1], 'decides', 0);
+    s += rel([[MID('visits'), T.visits.y + T.visits.h], [MID('visits'), T.visitor_cards.y]], [0, 1], [0, -1], 'uses', 0);
+    Object.keys(T).forEach(function (name) {
+      var t = T[name];
+      s += '<rect x="' + t.x + '" y="' + t.y + '" width="' + t.w + '" height="' + t.h + '" rx="12" fill="#fff" stroke="' + C.primary + '" stroke-width="2"/>';
+      s += '<path d="M' + t.x + ',' + (t.y + HEAD) + ' V' + (t.y + 12) + ' Q' + t.x + ',' + t.y + ' ' + (t.x + 12) + ',' + t.y + ' H' + (t.x + t.w - 12) + ' Q' + (t.x + t.w) + ',' + t.y + ' ' + (t.x + t.w) + ',' + (t.y + 12) + ' V' + (t.y + HEAD) + ' z" fill="' + C.primary + '"/>';
+      s += '<text x="' + (t.x + 14) + '" y="' + (t.y + 23) + '" font-size="15" font-weight="700" fill="#fff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">' + name + '</text>';
+      t.cols.forEach(function (c, i) {
+        var y = t.y + HEAD + i * ROW;
+        if (i % 2) s += '<rect x="' + (t.x + 1) + '" y="' + y + '" width="' + (t.w - 2) + '" height="' + ROW + '" fill="#f8f7fe"' + (i === t.cols.length - 1 ? ' rx="10"' : '') + '/>';
+        if (c[2]) s += '<rect x="' + (t.x + 10) + '" y="' + (y + 6) + '" width="26" height="15" rx="4" fill="' + (c[2] === 'PK' ? C.primary : C.secondary) + '"/><text x="' + (t.x + 23) + '" y="' + (y + 17.5) + '" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff">' + c[2] + '</text>';
+        s += '<text x="' + (t.x + 44) + '" y="' + (y + 18) + '" font-size="13" fill="' + C.text + '" font-weight="' + (c[2] ? 600 : 500) + '">' + esc(c[0]) + '</text>';
+        s += '<text x="' + (t.x + t.w - 12) + '" y="' + (y + 18) + '" text-anchor="end" font-size="11" fill="' + C.muted + '">' + esc(c[1]) + '</text>';
+      });
+    });
+    return s + '</svg>';
+  }
+  document.getElementById('er').innerHTML = er();
+
+  /* ---------- Tabs ---------- */
+  var tabs = [document.getElementById('tab-workflow'), document.getElementById('tab-database')];
+  function select(i, focus) {
+    tabs.forEach(function (t, k) {
+      t.setAttribute('aria-selected', k === i ? 'true' : 'false'); t.tabIndex = k === i ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = k !== i;
+    });
+    if (focus) tabs[i].focus();
+    history.replaceState(null, '', i === 0 ? '#workflow' : '#database');
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(i); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select((i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length, true); }
+    });
+  });
+  if (location.hash === '#database') select(1);
+})();
+</script>
+</body>
+</html>

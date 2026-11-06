@@ -8,14 +8,14 @@
 -- do that, on local PostgreSQL.
 select name, ok
 from (values
-  ('the seven tables exist',
+  ('the eight tables exist',
     (select count(*) from pg_tables where schemaname = 'public'
-       and tablename in ('profiles', 'employees', 'visitors', 'visits', 'visitor_cards', 'card_assignments', 'notifications')) = 7),
+       and tablename in ('profiles', 'employees', 'visitors', 'visits', 'visitor_cards', 'card_assignments', 'notifications', 'app_settings')) = 8),
   ('every public table has row-level security on',
     (select coalesce(bool_and(c.relrowsecurity), false) from pg_class c join pg_namespace n on n.oid = c.relnamespace
       where n.nspname = 'public' and c.relkind = 'r')),
-  ('the 18 policies exist',
-    (select count(*) from pg_policies where schemaname = 'public') = 18),
+  ('the 20 policies exist',
+    (select count(*) from pg_policies where schemaname = 'public') = 20),
   ('anon has no privilege on any public table or view',
     not exists (select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
                  where n.nspname = 'public' and c.relkind in ('r', 'v')
@@ -24,10 +24,10 @@ from (values
     not exists (select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
                  where n.nspname = 'public' and c.relkind in ('r', 'v')
                    and has_table_privilege('authenticated', c.oid, 'truncate,references,trigger'))),
-  ('signed-in users can run exactly the eight intended functions',
+  ('signed-in users can run exactly the nine intended functions',
     (select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
       where n.nspname = 'public' and p.proname <> 'rls_auto_enable' and has_function_privilege('authenticated', p.oid, 'execute'))
-    = array['auth_employee_id', 'auth_role', 'check_in_visit', 'check_out_visit', 'import_employees', 'mark_account_active', 'org_today', 'register_visit']),
+    = array['auth_employee_id', 'auth_role', 'check_in_visit', 'check_out_visit', 'import_candidates', 'import_employees', 'mark_account_active', 'org_today', 'register_visit']),
   ('the service role can run exactly the two invitation functions',
     (select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
       where n.nspname = 'public' and p.proname <> 'rls_auto_enable' and has_function_privilege('service_role', p.oid, 'execute'))

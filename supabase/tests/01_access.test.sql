@@ -89,9 +89,8 @@ select tests.logout();
 -- Profiles: roles cannot be changed by the person they belong to.
 select tests.login('emp1');
 select tests.ok(tests.count('select 1 from public.profiles') = 1, 'a user sees only their own profile');
-with u as (update public.profiles set role = 'admin' where id = auth.uid() returning 1)
-select tests.ok((select count(*) from u) = 0, 'an employee cannot promote themselves');
-select tests.throws($q$insert into public.profiles (id, role, full_name) values (gen_random_uuid(), 'admin', 'X')$q$, 'row-level security', 'an employee cannot create a profile');
+select tests.throws($q$update public.profiles set role = 'admin' where id = auth.uid()$q$, 'permission denied', 'an employee cannot promote themselves');
+select tests.throws($q$insert into public.profiles (id, role, full_name) values (gen_random_uuid(), 'admin', 'X')$q$, 'permission denied', 'an employee cannot create a profile');
 select tests.logout();
 select tests.ok((select role from public.profiles where id = tests.id('emp1')) = 'employee', 'the employee role is unchanged');
 select tests.login('hr');
@@ -117,8 +116,8 @@ select tests.ok(
 select tests.ok(
   (select array_agg(proname::text order by proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname <> 'rls_auto_enable' and has_function_privilege('authenticated', p.oid, 'execute'))
-  = array['auth_employee_id', 'auth_role', 'check_in_visit', 'check_out_visit', 'import_employees', 'mark_account_active', 'org_today', 'register_visit'],
-  'signed-in users can run exactly the eight intended functions');
+  = array['auth_employee_id', 'auth_role', 'check_in_visit', 'check_out_visit', 'import_candidates', 'import_employees', 'mark_account_active', 'org_today', 'register_visit'],
+  'signed-in users can run exactly the nine intended functions');
 select tests.ok(
   not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') and p.proname <> 'rls_auto_enable'),

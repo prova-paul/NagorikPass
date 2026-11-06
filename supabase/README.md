@@ -67,3 +67,7 @@ npm run test:functions       # Edge Function logic
 npm run typecheck:functions  # Edge Function code against the real supabase-js types
 npm run test:import-parity   # the browser's import preview and the database's import give identical answers
 ```
+
+## Temporary test data
+
+See `docs/TEST_DATA_GUIDE.md`. `npm run test:seed` tests the seed and cleanup on a local scratch database. Only `--execute --confirm=...` writes to the hosted project.

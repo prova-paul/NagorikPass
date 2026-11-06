@@ -1,0 +1,6 @@
+Employee ID,Full Name,Email,Department / Team,Designation
+00777,Imported One,one@e2e.test,Legal,Counsel
+00778,Imported Two,two@e2e.test,Legal,
+0101,Dup Code,dup@e2e.test,,
+00779,Bad Mail,nope,,
+00780,Dup Mail,one@e2e.test,,
